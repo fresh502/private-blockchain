@@ -1,7 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const dao = require('./dao/levelSandbox')();
 
-class BlockAPI {
+class WebAPI {
   constructor() {
     this.app = express();
     this.initExpress();
@@ -20,7 +21,7 @@ class BlockAPI {
   }
 
   initController() {
-    require('./controller/block')(this.app);
+    require('./controller/blockController')(this.app, dao);
   }
 
   start() {
@@ -31,4 +32,4 @@ class BlockAPI {
   }
 }
 
-new BlockAPI();
+new WebAPI();

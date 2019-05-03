@@ -1,25 +1,31 @@
 const level = require('level');
-const chainDB = './chaindata';
+const Sandbox = require('./sandbox');
+const chainDB = '../chaindata';
 
-class LevelSandbox {
+class LevelSandbox extends Sandbox {
   constructor() {
+    super();
     this.db = level(chainDB);
   }
 
-  getLevelDBData(key){
+  getBlockByHeight(height){
     return new Promise((resolve, reject) => {
-      this.db.get(key, (err, value) => {
-        if (err) return reject(err);
-        resolve(value);
+      this.db.get(height, (err, value) => {
+        if (err) {
+          if (err.name === 'NotFoundError') return resolve();
+          return reject(err);
+        }
+        resolve(JSON.parse(value));
       })
     })
   }
 
-  addLevelDBData(key, value) {
+  addBlock(height, block) {
     return new Promise((resolve, reject) => {
-      this.db.put(key, value, (err) => {
+      const value = JSON.stringify(block);
+      this.db.put(height, value, (err) => {
         if (err) return reject(err);
-        resolve(value);
+        resolve(block);
       })
     })
   }
@@ -28,7 +34,7 @@ class LevelSandbox {
     return new Promise((resolve, reject) => {
       let i = 0;
       this.db.createReadStream()
-        .on('data', (data) => {
+        .on('data', () => {
           i++;
         })
         .on('error', (err) => {
@@ -41,4 +47,4 @@ class LevelSandbox {
   }
 }
 
-module.exports.LevelSandbox = LevelSandbox;
+module.exports = () => { return new LevelSandbox() };
