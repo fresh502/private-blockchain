@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const dao = require('./dao/levelSandbox')();
+const { logErrors, clientErrorHandler, serverErrorHandler } = require('./middleware/errorHandler');
 
 class WebAPI {
   constructor() {
@@ -8,6 +9,7 @@ class WebAPI {
     this.initExpress();
     this.initExpressMiddleware();
     this.initController();
+    this.initErrorHandler();
     this.start();
   }
 
@@ -22,6 +24,12 @@ class WebAPI {
 
   initController() {
     require('./controller/blockController')(this.app, dao);
+  }
+
+  initErrorHandler() {
+    this.app.use(logErrors);
+    this.app.use(clientErrorHandler);
+    this.app.use(serverErrorHandler);
   }
 
   start() {

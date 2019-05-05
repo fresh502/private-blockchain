@@ -26,45 +26,6 @@ class Blockchain {
   async getBlockByHeight(height) {
     return this.dao.getBlockByHeight(height);
   }
-
-  async validateChain() {
-    const height = await this.getBlocksHeight();
-    const validatePromises = [];
-    for (let i = 0; i < height; i++) {
-      validatePromises.push(this.validateBlock(i));
-      validatePromises.push(this.validateBlockLinks(i));
-    }
-    const results = await Promise.all(validatePromises);
-    if (!results.includes(false)) console.log('No errors detected');
-  }
-
-  async validateBlock(blockHeight) {
-    const block = await this.getBlockByHeight(blockHeight);
-    const blockHash = block.hash;
-    block.hash = '';
-    const validBlockHash = SHA256(JSON.stringify(block)).toString();
-
-    if (blockHash !== validBlockHash) {
-      console.log(`Block #${blockHeight} invalid hash:\n${blockHash}<>${validBlockHash}`);
-      return false;
-    }
-    return true;
-  }
-
-  async validateBlockLinks(blockHeight) {
-    if (blockHeight === 0) return true;
-
-    const previousBlockHeight = blockHeight - 1;
-    const block = await this.getBlockByHeight(blockHeight);
-    const previousBlock = await this.getBlockByHeight(previousBlockHeight);
-
-    if (block.previousBlockHash !== previousBlock.hash) {
-      console.log(`Block #${previousBlockHeight} and Block #${blockHeight} links invalid`);
-      return false;
-    }
-    return true
-  }
-
 }
 
 module.exports = (dao) => { return new Blockchain(dao) };

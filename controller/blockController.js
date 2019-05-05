@@ -11,25 +11,48 @@ class BlockController {
   }
 
   getBlockByHeight() {
-    this.app.get('/block/:height', async (req, res) => {
-      const height = parseInt(req.params.height);
-      if (isNaN(height)) return res.status(400).end('Height parameter must be integer');
+    this.app.get('/block/:height', async (req, res, next) => {
+      try {
+        const height = parseInt(req.params.height);
+        if (isNaN(height)) {
+          res.status(400);
+          return next(new Error('Height parameter should be integer'));
+        }
 
-      const block = await this.model.getBlockByHeight(height);
-      if (!block) return res.status(404).end('Height parameter is out of bounds.');
+        const block = await this.model.getBlockByHeight(height);
+        if (!block) {
+          res.status(404);
+          return next(new Error('Height parameter is out of bounds.'));
+        }
 
-      res.json(block);
+        res.json(block);
+      } catch (e) {
+        next(e);
+      }
     })
   }
 
   postNewBlock() {
-    this.app.post('/block', async (req, res) => {
-      const { body: { body } } = req;
+    this.app.post('/block', async (req, res, next) => {
+      try {
+        const { body: { body } } = req;
 
-      if (!body || body === '') return res.status(400).end('Body should not be empty');
+        if (!body || body === '') {
+          res.status(400);
+          return next(new Error('Body should not be empty'));
+        }
 
-      const block = await this.model.addBlock(body);
-      res.json(block);
+        if (!isNaN(body)) {
+          res.status(400);
+          return next(new Error('Body should be string of text'));
+        }
+
+        const block = await this.model.addBlock(body);
+
+        res.json(block);
+      } catch (e) {
+        next(e);
+      }
     })
   }
 }
