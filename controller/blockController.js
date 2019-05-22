@@ -4,6 +4,7 @@ class BlockController {
     this.initService();
     this.initModel(dao);
     this.postRequestValidation();
+    this.postValidationRequest()
     this.getBlockByHeight();
     this.postNewBlock();
   }
@@ -22,11 +23,31 @@ class BlockController {
         const { body: { address } } = req;
         if (!address || address === '') {
           res.status(400);
-          return next(new Error('Body should not be empty'));
+          return next(new Error('Address should not be empty'));
         }
-        const requestValidation = await this.service.addRequestValidation(address, new Date().getTime().toString().slice(0,-3))
+        const requestValidation = this.service.addRequestValidation(address, this._getCurrentTime())
         res.json(requestValidation)
       } catch (e) {
+        next(e)
+      }
+    })
+  }
+
+  postValidationRequest() {
+    this.app.post('/message-signature/validate', async (req, res, next) => {
+      try {
+        const { body: { address, signature } } = req
+        if (!address || !signature || address === '' || signature === '') {
+          res.status(400)
+          return next(new Error('Address or Signature should not be empty'));
+        }
+        const validRequest = this.service.validateRequestByWallet(address, signature, this._getCurrentTime())
+        res.json(validRequest)
+      } catch (e) {
+        if (e.message === 'No request validation' || e.message === 'Invalid message') {
+          res.status(400)
+          return next(e)
+        }
         next(e)
       }
     })
@@ -76,6 +97,10 @@ class BlockController {
         next(e);
       }
     })
+  }
+
+  _getCurrentTime() {
+    return new Date().getTime().toString().slice(0,-3)
   }
 }
 
