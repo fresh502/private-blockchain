@@ -18,6 +18,14 @@ class Blockchain {
     return this.dao.addBlock(block.height, block);
   }
 
+  getBlockByHash(hash) {
+    return this.dao.getBlockByHash(hash);
+  }
+
+  getBlocksByAddress(address) {
+    return this.dao.getBlocksByAddress(address);
+  }
+
   async getBlocksHeight() {
     const count = await this.dao.getBlocksCount();
     return isNaN(count) ? 0 : count

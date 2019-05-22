@@ -1,3 +1,4 @@
+const hex2ascii = require('hex2ascii')
 const dao = require('../dao/levelSandbox')();
 
 class BlockService {
@@ -20,6 +21,26 @@ class BlockService {
         story: Buffer(story).toString('hex')
       }
     })
+  }
+
+  async getBlockByHash(hash) {
+    const block = await this.model.getBlockByHash(hash);
+    if (block) block.body.star.storyDecoded = hex2ascii(block.body.star.story);
+    return block
+  }
+
+  async getBlocksByAddress(address) {
+    const blocks = await this.model.getBlocksByAddress(address);
+    blocks.forEach(block => {
+      block.body.star.storyDecoded = hex2ascii(block.body.star.story);
+    });
+    return blocks
+  }
+
+  async getBlockByHeight(height) {
+    const block = await this.model.getBlockByHeight(height);
+    if (block) block.body.star.storyDecoded = hex2ascii(block.body.star.story);
+    return block
   }
 }
 

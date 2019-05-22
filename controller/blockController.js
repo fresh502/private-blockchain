@@ -5,6 +5,8 @@ class BlockController {
     this.postRequestValidation();
     this.postValidationRequest()
     this.postBlock();
+    this.getBlockByHash();
+    this.getBlocksByAddress();
     this.getBlockByHeight();
   }
 
@@ -75,6 +77,48 @@ class BlockController {
     })
   }
 
+  getBlockByHash() {
+    this.app.get('/stars/hash:hash', async (req, res, next) => {
+      try {
+        const hash = req.params.hash.slice(1)
+        if (!hash || hash === '') {
+          res.status(400);
+          return next(new Error('Hash parameter should be string text'));
+        }
+
+        const block = await this.blockService.getBlockByHash(hash);
+        if (!block) {
+          res.status(404);
+          return next(new Error('No hash exists'));
+        }
+        res.json(block);
+      } catch (e) {
+        next(e);
+      }
+    })
+  }
+
+  getBlocksByAddress() {
+    this.app.get('/stars/address:address', async (req, res, next) => {
+      try {
+        const address = req.params.address.slice(1)
+        if (!address || address === '') {
+          res.status(400);
+          return next(new Error('Address parameter should be string text'));
+        }
+
+        const block = await this.blockService.getBlocksByAddress(address);
+        if (!block) {
+          res.status(404);
+          return next(new Error('No Address exists'));
+        }
+        res.json(block);
+      } catch (e) {
+        next(e);
+      }
+    })
+  }
+
   getBlockByHeight() {
     this.app.get('/block/:height', async (req, res, next) => {
       try {
@@ -84,7 +128,7 @@ class BlockController {
           return next(new Error('Height parameter should be integer'));
         }
 
-        const block = await this.model.getBlockByHeight(height);
+        const block = await this.blockService.getBlockByHeight(height);
         if (!block) {
           res.status(404);
           return next(new Error('Height parameter is out of bounds.'));

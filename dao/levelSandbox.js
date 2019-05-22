@@ -8,6 +8,39 @@ class LevelSandbox extends Sandbox {
     this.db = level(chainDB);
   }
 
+  getBlockByHash(hash) {
+    let block;
+    return new Promise((resolve, reject) => {
+      this.db.createReadStream()
+        .on('data', (data) => {
+          const value = JSON.parse(data.value)
+          if (value.hash === hash) block = value;
+        })
+        .on('error', (err) => {
+          reject(err);
+        })
+        .on('close', () => {
+          resolve(block);
+        })
+    })
+  }
+
+  getBlocksByAddress(address) {
+    const blocks = [];
+    return new Promise((resolve, reject) => {
+      this.db.createReadStream()
+        .on('data', (data) => {
+          const value = JSON.parse(data.value)
+          if (value.body.address === address) blocks.push(value);
+        })
+        .on('error', (err) => {
+          reject(err);
+        })
+        .on('close', () => {
+          resolve(blocks);
+        })
+    })
+  }
   getBlockByHeight(height){
     return new Promise((resolve, reject) => {
       this.db.get(height, (err, value) => {
