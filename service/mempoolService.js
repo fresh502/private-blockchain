@@ -1,6 +1,6 @@
 const bitcoinMessage = require('bitcoinjs-message');
 
-class mempool {
+class MempoolService {
   constructor() {
     this.timeoutRequestsWindowTime = 5 * 60 * 1000;
     this.mempool = [];
@@ -48,6 +48,11 @@ class mempool {
     return ret
   }
 
+  verifyAddressRequest(address) {
+    const validateRequest = this.mempoolValid.find(({ status: { address: walletAddress } }) =>  address === walletAddress );
+    if (!validateRequest) throw new Error('Not verified address request')
+  }
+
   _getRequestValidation(address) {
     const requestValidation = this.mempool.find(({ walletAddress }) =>  address === walletAddress );
     return requestValidation || null
@@ -74,4 +79,4 @@ class mempool {
   }
 }
 
-module.exports = () => { return new mempool() };
+module.exports = () => { return new MempoolService() };
