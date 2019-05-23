@@ -11,9 +11,9 @@ class BlockService {
     this.model = require('../model/blockchain')(dao);
   }
 
-  addBlock(address, { dec, ra, story }) {
+  async addBlock(address, { dec, ra, story }) {
     this.mempoolService.verifyAddressRequest(address);
-    return this.model.addBlock({
+    const block = await this.model.addBlock({
       address,
       star: {
         ra,
@@ -21,6 +21,8 @@ class BlockService {
         story: Buffer(story).toString('hex')
       }
     })
+    this.mempoolService.removeValidation(address)
+    return block
   }
 
   async getBlockByHash(hash) {

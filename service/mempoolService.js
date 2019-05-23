@@ -60,10 +60,16 @@ class MempoolService {
 
   _setTimeoutToRemoveValidationRequest(address) {
     setTimeout(() => {
-      const reqIdx = this.mempool.findIndex(({ walletAddress }) =>  address === walletAddress );
+      this.removeValidation(address);
+    }, this.timeoutRequestsWindowTime)
+  }
+
+  removeValidation(address) {
+    const reqIdx = this.mempool.findIndex(({ walletAddress }) =>  address === walletAddress );
+    if (reqIdx >= 0) {
       this.mempool.splice(reqIdx, 1)
       this.mempoolValid.splice(reqIdx, 1)
-    }, this.timeoutRequestsWindowTime)
+    }
   }
 
   _setMessage(request) {
